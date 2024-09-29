@@ -4,12 +4,12 @@ import validateMiddleware from '../../middleware/validate.middleware.js';
 
 const route = express.Router();
 
-route.post(('/'), validateMiddleware.checkInput, usersController.createUser);
+route.get('/:id?', usersController.getUser);
+
+route.post('/', validateMiddleware.checkInput, usersController.createUser);
 
 route.route('/:id')
     .put(validateMiddleware.checkInput, usersController.updateUser)
     .delete(usersController.deleteUser);
-
-route.get(('/:id?'), usersController.getUser)
 
 export default route;

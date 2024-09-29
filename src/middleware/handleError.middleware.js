@@ -1,10 +1,12 @@
+import {StatusCodes} from 'http-status-codes'
+
 const errorHandler = (err, req, res, next) => {
     const messageError = err.messageObject || err.message;
     const error = {
-        status: err.status || 500,
+        status: err.status || StatusCodes.INTERNAL_SERVER_ERROR, //500
         error: messageError
     };
-    const status = err.status || 500;
+    const status = err.status || StatusCodes.INTERNAL_SERVER_ERROR;
   
     return res.status(status).json(error);
 };

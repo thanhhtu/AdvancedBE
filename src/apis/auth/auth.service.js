@@ -1,97 +1,46 @@
-// import usersModel from '../../models/users.model.js'
-// import userIdentityService from '../../service/authentication.service.js'
-// import hashService from '../../service/hash.service.js'
-// import mailService from '../../service/mail.service.js'
-// import bcrypt from 'bcryptjs'
+import usersModel from '../../models/users.model.js'
+import hashService from '../../service/hash.service.js'
+import CustomError from '../../service/customError.service.js';
+import { StatusCodes } from 'http-status-codes';
+import userIdentityService from '../../service/authentication.service.js'
+class AuthService{
+    async register(user){
+        try {
+            const newUser = await usersModel.getUserByEmail(user.Email);
+            if(newUser){
+                throw new CustomError(StatusCodes.CONFLICT, 'Email already exists'); //409
+            }
+            
+            const hashObj = await hashService.hashPassword(user.Password);
+            user.Password = hashObj.hashedPassword;
+            
+            const result = await usersModel.createUser(user);
+            console.log("a")
+            return result;
+        }catch(error){
+            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
+    }
 
-// class AuthService{
-//     async register(registerInfo){
-//         try {
-//             const user = await usersModel.getUserByEmail(registerInfo.Email);
-//             if(user != null){
-//                 return false;
-//             }
+    async login(loginInfo){
+        try {
+            const user = await usersModel.getUserByEmail(loginInfo.Email);
+            if(user == null){
+                throw new CustomError(StatusCodes.NOT_FOUND, 'Email not found');
+            }
+            const check = await hashService.checkPassword(loginInfo.Password, user.Password);
+            if(!check){
+                console.log("oke")
+                throw new CustomError(StatusCodes.UNAUTHORIZED, 'Wrong password'); //401
+            }
 
-//             const hashObj = await hashService.hashPassword(registerInfo.Pwd);
-//             registerInfo.Pwd = hashObj.hashedPassword;
-//             await usersModel.createUser(registerInfo);
-//             return true;
-//         }catch(error){
-//             throw new Error('Internal Service Error');
-//         }
-//     }
+            const token = await userIdentityService.encodeToken(user);
+            await usersModel.setAccessToken(token, loginInfo.Email)
+            return token;
+        }catch(error){
+            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
+    }
+}
 
-//     // async login(loginInfo){
-//     //     try {
-//     //         const user = await usersModel.getUserByEmail(loginInfo.email);
-//     //         if(user == null){
-//     //             return false;
-//     //         }
-//     //         const check = await hashService.checkPassword(loginInfo.password, user.Pwd);
-//     //         if(!check){
-//     //             return false;
-//     //         }
-
-//     //         const token = await userIdentityService.encodeToken(user);
-//     //         return token;
-//     //     }catch(error){
-//     //         // throw error;
-//     //         throw new Error('Internal Service Error');
-//     //     }
-//     // }
-
-//     // async forgotPassword(email) {
-//     //     try {
-//     //         const user = await usersModel.getUserByEmail(email);
-
-//     //         if(user == null){
-//     //             return false //user not exist
-//     //         }
-
-//     //         // const secretKey = crypto.randomBytes(32).toString('hex');
-//     //         // const passwordResetToken = crypto.createHash('sha256').update(secretKey).digest('hex');
-//     //         const passwordResetToken = await bcrypt.genSalt(10);
-//     //         const passwordResetExpiration = new Date(Date.now() + 10 * 60 * 1000); //10 minutes from the time sending req
-//     //         const updateStatus = await usersModel.setPasswordToken(passwordResetToken, passwordResetExpiration, email);
-
-//     //         if (updateStatus) {
-//     //             mailService.sendEmail({
-//     //                 emailFrom: 'thanhthanhvava2004@gmail.com',
-//     //                 emailTo: email,
-//     //                 emailSubject: 'Reset password',
-//     //                 emailText:
-//     //                     'Here is your reset password token: ' +
-//     //                     passwordResetToken,
-//     //             });
-//     //             return true;
-//     //         }
-
-//     //         throw new Error('Can not reset password');
-//     //     }catch(error){
-//     //         throw error;
-//     //     }
-//     // }
-
-//     // async resetPassword(email, passwordResetToken, newPassword) {
-//     //     try {
-//     //         const user = await usersModel.checkTokenPassword(email, passwordResetToken);
-
-//     //         if(user == null){
-//     //             return false; //invalid token or token has expired
-//     //         }
-
-//     //         const hashObj = await hashService.hashPassword(newPassword);
-//     //         const updateStatus = await usersModel.resetPassword(hashObj.hashedPassword, new Date(), email);
-
-//     //         if(updateStatus){
-//     //             return true;
-//     //         }
-
-//     //         throw new Error('Reset password fail');
-//     //     }catch(error){
-//     //         throw error;
-//     //     }
-//     // }
-// }
-
-// export default new AuthService()
+export default new AuthService()

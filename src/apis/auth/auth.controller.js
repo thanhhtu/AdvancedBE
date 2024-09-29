@@ -1,120 +1,58 @@
-// import authService from './auth.service.js';
+import authService from './auth.service.js';
+import { StatusCodes } from 'http-status-codes';
 
-// class AuthController {
-//     async register(req, res, next){
-//         try{
-//             const {Email, Password, Gender, Age, Role} = req.body;
-
-//             const check = await authService.register({Email, Password, Gender, Age, Role});
+class AuthController {
+    async register(req, res, next){
+        try{
+            const {Email, Password, RepeatPassword, Gender, Age, Role} = req.body;
+            const newUser = {Email, Password, RepeatPassword, Gender, Age, Role};
             
-//             if(check){
-//                 return res.status(201).json({
-//                     success: true,
-//                     message: 'Created user'
-//                 });
-//             }
-
-//             return res.status(409).json({
-//                 success: false,
-//                 message: 'Email already exist'
-//             });
+            const result = await authService.register(newUser);
             
-//         }catch(error){
-//             return res.status(500).json({
-//                 success: false,
-//                 message: error.message
-//             });
-//         }
-//     }
-    
-//     // async getMe(req, res, next) {
-//     //     try {
-//     //         return res.json({
-//     //             success: true,
-//     //             message: req.user,
-//     //         });
-//     //     } catch (error) {
-//     //         return res.status(500).json({
-//     //             success: false,
-//     //             message: "Internal Server Error"
-//     //         });
-//     //     }
-//     // }
+            return res.status(StatusCodes.OK).json({
+                success: true,
+                insertId: result
+            });
+        }catch(error){
+            return res.status(error.status).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 
-//     // async login(req, res, next){
-//     //     try{
-//     //         const {email, password} = req.body;
-//     //         const token = await authService.login({email, password});
-            
-//     //         if(token){
-//     //             console.log('token: ', token)
-//     //             return res.status(200).json({
-//     //                 success: true,
-//     //                 message: token
-//     //             });
-//     //         }
-            
-//     //         return res.status(401).json({
-//     //             success: false,
-//     //             message: 'Invalid email or password'
-//     //         });
-//     //     }catch(error){
-//     //         return res.status(500).json({
-//     //             success: false,
-//     //             message: error.message
-//     //         });
-//     //     }
-//     // }
+    async login(req, res, next){
+        try{
+            const {Email, Password} = req.body;
+            const token = await authService.login({Email, Password});
+            console.log(token)
+            if(token){
+                return res.status(StatusCodes.OK).json({
+                    success: true,
+                    token: token
+                });
+            }
+        }catch(error){
+            return res.status(error.status).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 
-//     // async forgotPassword(req, res, next){
-//     //     try {
-//     //         const {email} = req.body;
+    async getMe(req, res, next) {
+        try {
+            return res.status(StatusCodes.OK).json({
+                success: true,
+                UserId: req.user.id,
+            });
+        } catch (error) {
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    }
+}
 
-//     //         const check = await authService.forgotPassword(email);
-//     //         console.log(check);
-//     //         if(check){
-//     //             return res.status(200).json({
-//     //                 success: true,
-//     //                 message: 'Reset password email sent successfully'
-//     //             });
-//     //         }
-
-//     //         return res.status(400).json({
-//     //             success: false,
-//     //             message: "Email not found"
-//     //         });
-//     //     } catch (error) {
-//     //         return res.status(400).json({
-//     //             success: false,
-//     //             message: error.message
-//     //         });
-//     //     }
-//     // }
-
-//     // async resetPassword(req, res, next){
-//     //     try {
-//     //         const {email, passwordResetToken, newPassword} = req.body;
-
-//     //         const check = await authService.resetPassword(email, passwordResetToken, newPassword);
-//     //         console.log(check)
-//     //         if(check){
-//     //             return res.status(200).json({
-//     //                 success: true,
-//     //                 message: 'Reset password successfully'
-//     //             });
-//     //         }
-
-//     //         return res.status(400).json({
-//     //             success: false,
-//     //             message: "Invalid token or token has expired"
-//     //         });
-//     //     } catch (error) {
-//     //         return res.status(400).json({
-//     //             success: false,
-//     //             message: error.message
-//     //         });
-//     //     }
-//     // }
-// }
-
-// export default new AuthController();
+export default new AuthController();

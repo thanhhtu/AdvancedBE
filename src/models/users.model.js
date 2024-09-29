@@ -1,11 +1,17 @@
 import pool from '../config/database.config.js';
+import CustomError from '../service/customError.service.js';
+import { StatusCodes } from 'http-status-codes';
 
 class UsersModel {
     async getUsers() {
-        const connection = await pool.getConnection();
-        const [rows] = await connection.query('SELECT Email, (CAST (Gender AS INT)) AS Gender, Age, Role FROM users');
-        connection.release();
-        return rows;
+        try{
+            const connection = await pool.getConnection();
+            const [rows] = await connection.query('SELECT Email, (CAST (Gender AS INT)) AS Gender, Age, Role FROM users');
+            connection.release();
+            return rows;
+        }catch(error){
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
     }
 
     async getDetailUser(userId){
@@ -17,7 +23,7 @@ class UsersModel {
             connection.release();
             return rows[0];
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
@@ -28,9 +34,10 @@ class UsersModel {
             const {Email, Password, Gender, Age, Role} = user;
             const value = [Email, Password, Gender, Age, Role];
             const results = await connection.query(query, value);
+            connection.release();
             return results[0].insertId;
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
@@ -41,9 +48,10 @@ class UsersModel {
             const {Email, Password, Gender, Age, Role, UserID} = user;
             const value = [Email, Password, Gender, Age, Role, UserID];
             const results = await connection.query(query, value);
+            connection.release();
             return results[0].affectedRows;
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
@@ -53,9 +61,10 @@ class UsersModel {
             const query = `DELETE FROM users WHERE UserID = ?`;
             const value = [userId];
             const results = await connection.query(query, value);
+            connection.release();
             return results[0].affectedRows;
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
@@ -68,44 +77,33 @@ class UsersModel {
             connection.release();
             return rows[0];
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
-    async setPasswordToken(passwordResetToken, passwordResetExpiration, email){
+    async setAccessToken(accessToken, email){
         try{
             const connection = await pool.getConnection();
-            const query = `UPDATE users SET PasswordResetToken = ?, PasswordResetExpiration = ? WHERE Email = ?`;
-            const value = [passwordResetToken, passwordResetExpiration, email];
+            const query = `UPDATE users SET AccessToken = ? WHERE Email = ?`;
+            const value = [accessToken, email];
             await connection.query(query, value);
+            connection.release();
             return true;
         }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 
-    async checkTokenPassword(email, passwordResetToken){
+    async getAccessTokenByUserID(userId){
         try{
-            const connection = await pool.getConnection()
-            const query = `SELECT * FROM users WHERE Email = ? AND PasswordResetToken = ? AND PasswordResetExpiration >= ?`;
-            const value = [email, passwordResetToken, new Date(Date.now())];
+            const connection = await pool.getConnection();
+            const query = `SELECT AccessToken FROM users WHERE UserID = ?`;
+            const value = [userId];
             const [rows] = await connection.query(query, value);
             connection.release();
-            return rows[0];
+            return rows[0].AccessToken;
         }catch(error){
-            throw error;
-        }
-    }
-
-    async resetPassword(newHashedPassword, passwordLastResetDate, email){
-        try{
-            const connection = await pool.getConnection();
-            const query = `UPDATE users SET Pwd = ?, PasswordResetToken = NULL, PasswordResetExpiration = NULL, PasswordLastResetDate = ? WHERE Email = ?`;
-            const value = [newHashedPassword, passwordLastResetDate, email];
-            await connection.query(query, value);
-            return true;
-        }catch(error){
-            throw error;
+            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
 }
