@@ -3,7 +3,7 @@ import hashService from '../../service/hash.service'
 import CustomError from '../../service/customError.service';
 import { StatusCodes } from 'http-status-codes';
 import { errorInfo } from '../../service/handleError.service';
-import { ILoginInfo, IUserPostInfo } from '../../types/interfaces/user.interface';
+import { ILoginInfo, IUserPostInfo } from '../../types/user.interface';
 import userIdentityService from '../../service/authentication.service'
 
 class AuthService{

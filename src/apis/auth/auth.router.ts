@@ -7,6 +7,6 @@ const route = express.Router();
 
 route.post('/register', validateMiddleware.checkInput, authController.register);
 route.post('/login', validateMiddleware.checkLogin, authController.login);
-// route.get('/me', verifyMiddleware.checkAuth);
+route.get('/me', verifyMiddleware.checkAuth, authController.getMe);
 
 export default route;

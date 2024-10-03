@@ -2,7 +2,7 @@ import authService from './auth.service';
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
 import { handlerErrorRes } from '../../service/handleError.service';
-import { IUserPostInfo } from '../../types/interfaces/user.interface';
+import { IUserPostInfo } from '../../types/user.interface';
 
 class AuthController {
     async register(req: Request, res: Response, next: NextFunction): Promise<void>{
@@ -35,16 +35,16 @@ class AuthController {
         }
     }
 
-    // async getMe(req: Request, res: Response, next: NextFunction): Promise<void>{
-    //     try {
-    //         res.status(StatusCodes.OK).json({
-    //             success: true,
-    //             UserId: req.user.id,
-    //         });
-    //     }catch(error: unknown){
-    //         handlerErrorRes(error, res);
-    //     }
-    // }
+    async getMe(req: Request, res: Response, next: NextFunction): Promise<void>{
+        try {
+            res.status(StatusCodes.OK).json({
+                success: true,
+                UserId: req.user.id,
+            });
+        }catch(error: unknown){
+            handlerErrorRes(error, res);
+        }
+    }
 }
 
 export default new AuthController();

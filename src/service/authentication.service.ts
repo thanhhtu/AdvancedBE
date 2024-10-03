@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { IPayload, IUser } from '../types/interfaces/user.interface';
+import { IUser } from '../types/user.interface';
 import 'dotenv/config';
-import CustomError from './customError.service';
-import { StatusCodes } from 'http-status-codes';
 
 class UserIdentityService {
     async encodeToken(user: IUser) {
@@ -18,8 +16,8 @@ class UserIdentityService {
         )
     }
 
-    async decodeToken(token: string) {
-        return jwt.verify(token, process.env.JWT_SECRET!) as IPayload; //! is non null
+    async decodeToken(token: string){
+        return jwt.verify(token, process.env.JWT_SECRET!) as Record<string, any>; //! is non null
     }
 }
 

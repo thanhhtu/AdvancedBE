@@ -17,7 +17,7 @@ class VerifyMiddleware {
             token = token.split(' ')[1];
             req.user = await userIdentityService.decodeToken(token);
             
-            let userID = req.user.id;
+            let userID: number = Number(req.user.id);
             let storedToken = await usersModel.getAccessTokenByUserID(userID);
             if (token != storedToken) {
                 throw new CustomError(StatusCodes.UNAUTHORIZED, 'Invalid token');

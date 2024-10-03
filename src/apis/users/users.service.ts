@@ -2,7 +2,7 @@ import usersModel from '../../models/users.model';
 import hashService from '../../service/hash.service'
 import CustomError from '../../service/customError.service';
 import { StatusCodes } from 'http-status-codes';
-import { IUserGetInfo, IUserPostInfo } from '../../types/interfaces/user.interface';
+import { IUserGetInfo, IUserPostInfo } from '../../types/user.interface';
 import { errorInfo } from '../../service/handleError.service';
 
 class UsersService{

@@ -1,7 +1,7 @@
 import { ResultSetHeader } from 'mysql2/promise'
 import pool from '../config/database.config';
 import CustomError from '../service/customError.service';
-import { IUser, IUserGetInfo, IUserPostInfo } from '../types/interfaces/user.interface';
+import { IUser, IUserGetInfo, IUserPostInfo } from '../types/user.interface';
 import { errorInfo } from '../service/handleError.service';
 
 class UsersModel {

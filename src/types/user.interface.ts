@@ -30,7 +30,3 @@ export interface ILoginInfo{
     Email: string;
     Password: string;
 }
-
-export interface IPayload{
-    id: number;
-}
