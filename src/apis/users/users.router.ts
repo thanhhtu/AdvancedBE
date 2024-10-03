@@ -1,6 +1,6 @@
 import express from 'express';
-import usersController from './users.controller.js';
-import validateMiddleware from '../../middleware/validate.middleware.js';
+import usersController from './users.controller';
+import validateMiddleware from '../../middleware/validate.middleware';
 
 const route = express.Router();
 

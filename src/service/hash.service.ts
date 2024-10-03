@@ -1,13 +1,13 @@
 import bcrypt from 'bcryptjs';
 
 class HashService {
-    async hashPassword(plainText){
+    async hashPassword(plainText: string){
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(plainText, salt);
-        return {salt, hashedPassword};
+        return { salt, hashedPassword };
     }
 
-    async checkPassword(plainText, hash){
+    async checkPassword(plainText: string, hash: string){
         return await bcrypt.compare(plainText, hash);
     }
 }

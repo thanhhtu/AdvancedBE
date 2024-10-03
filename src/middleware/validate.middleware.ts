@@ -1,8 +1,11 @@
-import {StatusCodes} from 'http-status-codes'
-import Joi from 'joi'
+import {StatusCodes} from 'http-status-codes';
+import Joi from 'joi';
+import { Request, Response, NextFunction } from 'express';
+import CustomError from '../service/customError.service';
+import { handlerErrorRes } from '../service/handleError.service';
 
 class ValidateMiddleware {
-    async checkInput(req, res, next) {
+    async checkInput(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const validateInput = Joi.object({
                 Email: Joi.string()
@@ -39,18 +42,15 @@ class ValidateMiddleware {
             await validateInput.validateAsync(req.body, { abortEarly: false });
             
             req.body.Gender = (req.body.Gender === "woman" ? 1 : 0);
-            req.body.Role = (req.body.Role === "admin" ? 0 : 1);
+            req.body.Role = (req.body.Role === "admin" ? 1 : 2);
 
             next();
-        } catch (error) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
-                error: (new Error(error)).message,
-            });
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
         }
     }
 
-    async checkLogin(req, res, next) {
+    async checkLogin(req: Request, res: Response, next: NextFunction) {
         try {
             const validateInput = Joi.object({
                 Email: Joi.string()
@@ -67,22 +67,17 @@ class ValidateMiddleware {
             await validateInput.validateAsync(req.body, { abortEarly: false });
             
             next();
-        } catch (error) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
-                error: (new Error(error)).message,
-            });
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
         }
     }
 
     //again
-    async checkUrl(req, res, next){
-        if(true){
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
-                error: 'Invalid URL',
-            })
-        }
+    async checkUrl(req: Request, res: Response, next: NextFunction){
+        res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            error: 'Invalid URL',
+        })
     }
 }
 

@@ -1,28 +1,31 @@
-import usersModel from '../../models/users.model.js'
-import hashService from '../../service/hash.service.js'
-import CustomError from '../../service/customError.service.js';
+import usersModel from '../../models/users.model'
+import hashService from '../../service/hash.service'
+import CustomError from '../../service/customError.service';
 import { StatusCodes } from 'http-status-codes';
-import userIdentityService from '../../service/authentication.service.js'
+import { errorInfo } from '../../service/handleError.service';
+import { ILoginInfo, IUserPostInfo } from '../../types/interfaces/user.interface';
+import userIdentityService from '../../service/authentication.service'
+
 class AuthService{
-    async register(user){
+    async register(user: IUserPostInfo){
         try {
             const newUser = await usersModel.getUserByEmail(user.Email);
             if(newUser){
                 throw new CustomError(StatusCodes.CONFLICT, 'Email already exists'); //409
             }
-            
+
             const hashObj = await hashService.hashPassword(user.Password);
             user.Password = hashObj.hashedPassword;
-            
+
             const result = await usersModel.createUser(user);
-            console.log("a")
             return result;
-        }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }catch(error: unknown){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 
-    async login(loginInfo){
+    async login(loginInfo: ILoginInfo){
         try {
             const user = await usersModel.getUserByEmail(loginInfo.Email);
             if(user == null){
@@ -30,15 +33,15 @@ class AuthService{
             }
             const check = await hashService.checkPassword(loginInfo.Password, user.Password);
             if(!check){
-                console.log("oke")
                 throw new CustomError(StatusCodes.UNAUTHORIZED, 'Wrong password'); //401
             }
 
             const token = await userIdentityService.encodeToken(user);
             await usersModel.setAccessToken(token, loginInfo.Email)
             return token;
-        }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }catch(error: unknown){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 }

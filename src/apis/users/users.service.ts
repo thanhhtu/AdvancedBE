@@ -1,12 +1,14 @@
-import usersModel from '../../models/users.model.js';
-import hashService from '../../service/hash.service.js'
-import CustomError from '../../service/customError.service.js';
+import usersModel from '../../models/users.model';
+import hashService from '../../service/hash.service'
+import CustomError from '../../service/customError.service';
 import { StatusCodes } from 'http-status-codes';
+import { IUserGetInfo, IUserPostInfo } from '../../types/interfaces/user.interface';
+import { errorInfo } from '../../service/handleError.service';
 
 class UsersService{
-    async getInfo(user){
-        user.Gender = user.Gender === 0 ? 'man' : 'woman';
-        user.Role = user.Role === 0 ? 'admin' : 'user';
+    async getInfo(user: IUserGetInfo){
+        user.Gender = user.Gender == '0' ? 'man' : 'woman';
+        user.Role = user.Role == '1' ? 'admin' : 'user';
     }
 
     async getUsers(){
@@ -16,12 +18,13 @@ class UsersService{
                 await this.getInfo(user);
             }
             return users;
-        }catch(error){
-            throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }catch(error: unknown){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 
-    async getDetailUser(userId){
+    async getDetailUser(userId: number){
         try {
             const user = await usersModel.getDetailUser(userId);
             if(user == null){
@@ -29,12 +32,13 @@ class UsersService{
             }
             await this.getInfo(user);
             return user;
-        }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }catch(error: unknown){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
     
-    async createUser(user){
+    async createUser(user: IUserPostInfo){
         try {
             const newUser = await usersModel.getUserByEmail(user.Email);
             if(newUser){
@@ -47,13 +51,14 @@ class UsersService{
             const result = await usersModel.createUser(user);
             return result;
         }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 
-    async updateUser(user){
+    async updateUser(user: IUserPostInfo, userID: number){
         try {
-            const updateUser = await usersModel.getDetailUser(user.UserID);
+            const updateUser = await usersModel.getDetailUser(userID);
             if(updateUser == null){
                 throw new CustomError(StatusCodes.NOT_FOUND, 'User not found'); //404
             }else if(user.Email != updateUser.Email){
@@ -62,14 +67,15 @@ class UsersService{
             
             const hashObj = await hashService.hashPassword(user.Password);
             user.Password = hashObj.hashedPassword;
-            const result = await usersModel.updateUser(user);
+            const result = await usersModel.updateUser(user, userID);
             return result;
         }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 
-    async deleteUser(userId){
+    async deleteUser(userId: number){
         try {
             const updateUser = await usersModel.getDetailUser(userId);
             if(updateUser == null){
@@ -79,7 +85,8 @@ class UsersService{
             const result = await usersModel.deleteUser(userId);
             return result;
         }catch(error){
-            throw new CustomError(error.status || StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
         }
     }
 }
