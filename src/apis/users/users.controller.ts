@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { Request, Response, NextFunction}  from 'express';
 import usersService from './users.service';
 import { handlerErrorRes } from '../../service/handleError.service';
-import { IUserGetInfo, IUserPostInfo } from '../../types/user.interface';
+import { IUserPostInfo } from '../../types/user.interface';
 
 class UsersController {
     async getUser(req: Request, res: Response, next: NextFunction): Promise<void>{
