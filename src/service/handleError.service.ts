@@ -16,7 +16,7 @@ let handlerErrorRes = (error: unknown, res: Response) => {
     }else{
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            error: 'Unknown error',
+            error: 'Internal Server Error',
         });
     }
 }
@@ -33,7 +33,7 @@ function errorInfo(error: unknown){
         messageError = error.message;
     }else{
         statusError = StatusCodes.INTERNAL_SERVER_ERROR;
-        messageError = "Unknown error";
+        messageError = "Internal Server Error";
     }
 
     return { statusError, messageError }

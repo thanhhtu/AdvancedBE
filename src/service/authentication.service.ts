@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { IUser } from '../types/user.interface';
+import { IUser } from '../types/user.data';
 import 'dotenv/config';
 
 class UserIdentityService {

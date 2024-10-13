@@ -14,7 +14,7 @@ export interface IUserGetInfo extends RowDataPacket{
     Email: string;
     Gender: string;
     Age: number;
-    Role: string;
+    Role: string[];
 }
 
 export interface IUserPostInfo{ //người dùng nhập
@@ -23,7 +23,7 @@ export interface IUserPostInfo{ //người dùng nhập
     RepeatPassword: string;
     Gender: string;
     Age: number;
-    Role: string;
+    Role: string[];
 }
 
 export interface ILoginInfo{

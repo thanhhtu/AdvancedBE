@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { Request, Response, NextFunction}  from 'express';
 import usersService from './users.service';
 import { handlerErrorRes } from '../../service/handleError.service';
-import { IUserPostInfo } from '../../types/user.interface';
+import { IUserPostInfo } from '../../types/user.data';
 
 class UsersController {
     async getUser(req: Request, res: Response, next: NextFunction): Promise<void>{
@@ -18,22 +18,21 @@ class UsersController {
                 success: true,
                 data: users
             });
-        }catch(error: unknown){
+        }catch(error){
             handlerErrorRes(error, res);
         }
     }
 
     async createUser(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{
-            const {Email, Password, RepeatPassword, Gender, Age, Role} = req.body;
-            const newUser: IUserPostInfo = {Email, Password, RepeatPassword, Gender, Age, Role};
+            const newUser: IUserPostInfo = req.body;
 
             const result = await usersService.createUser(newUser);
             res.status(StatusCodes.OK).json({
                 success: true,
                 insertId: result
             });
-        }catch(error: unknown){
+        }catch(error){
             handlerErrorRes(error, res);
         }
     }
@@ -41,15 +40,14 @@ class UsersController {
     async updateUser(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{
             const userID = Number(req.params.id);
-            const {Email, Password, RepeatPassword, Gender, Age, Role} = req.body;
-            const updateUser: IUserPostInfo = {Email, Password, RepeatPassword, Gender, Age, Role};
+            const updateUser: IUserPostInfo = req.body;
 
             const result = await usersService.updateUser(updateUser, userID);
             res.status(StatusCodes.OK).json({
                 success: true,
                 affectRows: result
             });
-        }catch(error: unknown){
+        }catch(error){
             handlerErrorRes(error, res);
         }
     }
@@ -62,7 +60,7 @@ class UsersController {
                 success: true,
                 affectRows: result
             });
-        }catch(error: unknown){
+        }catch(error){
             handlerErrorRes(error, res);
         }
     }

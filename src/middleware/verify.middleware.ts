@@ -8,7 +8,6 @@ import CustomError from '../service/customError.service';
 class VerifyMiddleware {
     async checkAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            
             let token = req.headers.authorization;
             if(!token){
                 throw new CustomError(StatusCodes.UNAUTHORIZED, 'No token provided');

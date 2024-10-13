@@ -6,6 +6,7 @@ declare global {
     namespace Express {
         interface Request {
             user: Record<string, any>;
+            permission: Record<string, any>;
         }
     }
 }

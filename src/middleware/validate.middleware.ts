@@ -1,11 +1,11 @@
 import {StatusCodes} from 'http-status-codes';
 import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
-import CustomError from '../service/customError.service';
 import { handlerErrorRes } from '../service/handleError.service';
+import { RoleArray } from '../types/rbac.data';
 
 class ValidateMiddleware {
-    async checkInput(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async checkInputUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const validateInput = Joi.object({
                 Email: Joi.string()
@@ -31,19 +31,50 @@ class ValidateMiddleware {
                         .max(200)
                         .required(),
                 
-                Role: Joi.string()
-                        .valid('admin', 'user')
-                        .trim()
-                        .required(),
+                Role: Joi.array()
+                        .items(Joi.string().valid(...RoleArray))
                 
             })
             .with('Password', 'RepeatPassword');
 
             await validateInput.validateAsync(req.body, { abortEarly: false });
             
-            req.body.Gender = (req.body.Gender === "woman" ? 1 : 0);
-            req.body.Role = (req.body.Role === "admin" ? 1 : 2);
+            req.body.Gender = (req.body.Gender == "woman" ? 1 : 0);
+            if(req.body.Role){
+                req.body.Role = req.body.Role.map((role: string) => {
+                    return RoleArray.indexOf(role) + 1;
+                });
+            }
 
+            next();
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
+        }
+    }
+
+    async checkInputBook(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validateInput = Joi.object({
+                Name: Joi.string()
+                            .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+                            .trim()
+                            .required(),
+            })
+
+            await validateInput.validateAsync(req.body, { abortEarly: false });
+            
+            next();
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
+        }
+    }
+
+    async checkNumberParam(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validateInput = Joi.object({
+                id: Joi.number().integer().required()                
+            })
+            await validateInput.validateAsync(req.params, { abortEarly: false });
             next();
         } catch (error: unknown) {
             handlerErrorRes(error, res);
@@ -74,7 +105,7 @@ class ValidateMiddleware {
 
     //again
     async checkUrl(req: Request, res: Response, next: NextFunction){
-        res.status(StatusCodes.BAD_REQUEST).json({
+        res.status(StatusCodes.NOT_FOUND).json({
             success: false,
             error: 'Invalid URL',
         })

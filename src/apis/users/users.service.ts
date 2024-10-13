@@ -2,13 +2,13 @@ import usersModel from '../../models/users.model';
 import hashService from '../../service/hash.service'
 import CustomError from '../../service/customError.service';
 import { StatusCodes } from 'http-status-codes';
-import { IUserGetInfo, IUserPostInfo } from '../../types/user.interface';
+import { IUserGetInfo, IUserPostInfo } from '../../types/user.data';
 import { errorInfo } from '../../service/handleError.service';
 
 class UsersService{
     async getInfo(user: IUserGetInfo){
         user.Gender = user.Gender == '0' ? 'man' : 'woman';
-        user.Role = user.Role == '1' ? 'admin' : 'user';
+        // user.Role = user.Role == '1' ? 'admin' : 'user';
     }
 
     async getUsers(){
@@ -18,7 +18,7 @@ class UsersService{
                 await this.getInfo(user);
             }
             return users;
-        }catch(error: unknown){
+        }catch(error){
             const { statusError, messageError } = errorInfo(error);
             throw new CustomError(statusError, messageError);
         }
@@ -27,12 +27,9 @@ class UsersService{
     async getDetailUser(userId: number){
         try {
             const user = await usersModel.getDetailUser(userId);
-            if(user == null){
-                throw new CustomError(StatusCodes.NOT_FOUND, 'User not found'); //404
-            }
             await this.getInfo(user);
             return user;
-        }catch(error: unknown){
+        }catch(error){
             const { statusError, messageError } = errorInfo(error);
             throw new CustomError(statusError, messageError);
         }
@@ -59,9 +56,7 @@ class UsersService{
     async updateUser(user: IUserPostInfo, userID: number){
         try {
             const updateUser = await usersModel.getDetailUser(userID);
-            if(updateUser == null){
-                throw new CustomError(StatusCodes.NOT_FOUND, 'User not found'); //404
-            }else if(user.Email != updateUser.Email){
+            if(user.Email != updateUser.Email){
                 throw new CustomError(StatusCodes.BAD_REQUEST, 'This is not your email'); //400
             }
             
@@ -77,10 +72,7 @@ class UsersService{
 
     async deleteUser(userId: number){
         try {
-            const updateUser = await usersModel.getDetailUser(userId);
-            if(updateUser == null){
-                throw new CustomError(StatusCodes.NOT_FOUND, 'User not found'); //404
-            }
+            await usersModel.getDetailUser(userId);
 
             const result = await usersModel.deleteUser(userId);
             return result;
