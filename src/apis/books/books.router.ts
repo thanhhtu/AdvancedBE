@@ -14,6 +14,6 @@ route.get('/:id?', rbacMiddleware.checkPermission(PermissionObject.VIEW_BOOKS), 
 
 route.post('/', validateMiddleware.checkInputBook, rbacMiddleware.checkPermission(PermissionObject.ADD_BOOKS), booksController.addBooks);
 
-
+route.delete('/:id', rbacMiddleware.checkPermission(PermissionObject.DELETE_BOOKS), booksController.deleteBook);
 
 export default route;

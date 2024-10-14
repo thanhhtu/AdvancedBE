@@ -67,23 +67,17 @@ class BooksModel {
     //     }
     // }
 
-    // async deleteUser(userId: number){
-    //     try{
-    //         const connection = await pool.getConnection();
-
-    //         //delete role of user
-    //         await connection.query<ResultSetHeader>('DELETE FROM users_roles WHERE UserID = ?', userId);
-
-    //         //delete user
-    //         const resultsUser = await connection.query<ResultSetHeader>('DELETE FROM users WHERE UserID = ?', userId);
-
-    //         connection.release();
-    //         return resultsUser[0].affectedRows;
-    //     }catch(error){
-    //         const { statusError, messageError } = errorInfo(error);
-    //         throw new CustomError(statusError, messageError);
-    //     }
-    // }
+    async deleteBook(bookId: number){
+        try{
+            const connection = await pool.getConnection();
+            const resultsUser = await connection.query<ResultSetHeader>('DELETE FROM books WHERE BookID = ?', bookId);
+            connection.release();
+            return resultsUser[0].affectedRows;
+        }catch(error){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
+        }
+    }
 }
 
 export default new BooksModel()

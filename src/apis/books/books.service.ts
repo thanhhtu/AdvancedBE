@@ -25,6 +25,17 @@ class BooksService{
             throw new CustomError(statusError, messageError);
         }
     }
+
+    async deleteBook(bookId: number){
+        try {
+            await booksModel.getDetailBook(bookId);
+            const result = await booksModel.deleteBook(bookId);
+            return result;
+        }catch(error){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
+        }
+    }
 }
 
 export default new BooksService();

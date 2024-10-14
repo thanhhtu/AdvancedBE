@@ -31,6 +31,19 @@ class BooksController {
             handlerErrorRes(error, res);
         }
     }
+
+    async deleteBook(req: Request, res: Response, next: NextFunction): Promise<void>{
+        try{
+            const bookId = Number(req.params.id);
+            const result = await booksService.deleteBook(bookId);
+            res.status(StatusCodes.OK).json({
+                success: true,
+                affectRows: result
+            });
+        }catch(error){
+            handlerErrorRes(error, res);
+        }
+    }
 }
 
 export default new BooksController();

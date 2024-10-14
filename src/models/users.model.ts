@@ -48,10 +48,9 @@ class UsersModel {
             const resultsUser = await connection.query<ResultSetHeader>(queryUser, valueUser);
 
             //insert user-role
-            for(let i = 0; i < Role.length; i++){
-                const queryRole = `INSERT INTO users_roles (UserID, RoleID) VALUES (?, ?);`;
-                const valueRole = [resultsUser[0].insertId, Role[i]];
-                await connection.query<ResultSetHeader>(queryRole, valueRole);
+            if (Role.length > 0) {
+                const values = Role.map(roleId => `(${resultsUser[0].insertId}, ${roleId})`).join(', ');
+                await connection.query<ResultSetHeader>(`INSERT INTO users_roles (UserID, RoleID) VALUES ${values};`);
             }
 
             connection.release();

@@ -1,3 +1,4 @@
+import { ResultSetHeader } from 'mysql2';
 import pool from '../config/database.config';
 import CustomError from '../service/customError.service';
 import { errorInfo } from '../service/handleError.service';
@@ -15,6 +16,43 @@ class RbacModel {
             const result = rows.map((role: IUserRole) => role.RoleName)
             connection.release();
             return result;
+        }catch(error){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
+        }
+    }
+
+    async addRoleToUser(userId: number, newRoleIds: number[]){
+        try{
+            const connection = await pool.getConnection();
+            if (newRoleIds.length > 0) {
+                const values = newRoleIds.map(roleId => `(${userId}, ${roleId})`).join(', ');
+                await connection.query<ResultSetHeader>(`INSERT INTO users_roles (UserID, RoleID) VALUES ${values};`);
+            }
+            connection.release();
+            return true;
+        }catch(error){
+            const { statusError, messageError } = errorInfo(error);
+            throw new CustomError(statusError, messageError);
+        }
+    }
+
+    async deleteRoleFromUser(userId: number, delRoleId: number){
+        try{
+            const connection = await pool.getConnection();
+            
+            // if (delRoleIds.length > 1) {
+            //     const valuesToDelete = delRoleIds.slice(0, -1).join(', '); //Del except the last element
+            
+            //     await connection.query<ResultSetHeader>(
+            //         `DELETE FROM users_roles WHERE UserID = ? AND RoleID IN (${valuesToDelete});`,
+            //         [userId]
+            //     );
+            // }
+            
+            await connection.query<ResultSetHeader>(`DELETE FROM users_roles WHERE UserID = ? AND RoleID = ?`,  [userId, delRoleId]);
+            connection.release();
+            return true;
         }catch(error){
             const { statusError, messageError } = errorInfo(error);
             throw new CustomError(statusError, messageError);

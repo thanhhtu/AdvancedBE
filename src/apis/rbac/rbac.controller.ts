@@ -17,6 +17,34 @@ class RbacController {
             handlerErrorRes(error, res);
         }
     }
+
+    async assignRoleToUser(req: Request, res: Response, next: NextFunction): Promise<void>{
+        try{
+            const userId = Number(req.params.id);
+            const newRoles = req.body.Role;
+            const result = await rbacService.assignRoleToUser(userId, newRoles);
+            res.status(StatusCodes.OK).json({
+                success: true,
+                data: result
+            });            
+        }catch(error){
+            handlerErrorRes(error, res);
+        }
+    }
+
+    async deleteRoleFromUser(req: Request, res: Response, next: NextFunction): Promise<void>{
+        try{
+            const userId = Number(req.params.id);
+            const delRoleIds = req.body.Role;
+            const result = await rbacService.deleteRoleFromUser(userId, delRoleIds);
+            res.status(StatusCodes.OK).json({
+                success: true,
+                data: result
+            });            
+        }catch(error){
+            handlerErrorRes(error, res);
+        }
+    }
     
     async getPermissionsOfRole(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{

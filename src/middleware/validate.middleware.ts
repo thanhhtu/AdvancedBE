@@ -3,6 +3,7 @@ import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
 import { handlerErrorRes } from '../service/handleError.service';
 import { RoleArray } from '../types/rbac.data';
+import rbacModel from '../models/rbac.model';
 
 class ValidateMiddleware {
     async checkInputUser(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -33,7 +34,7 @@ class ValidateMiddleware {
                 
                 Role: Joi.array()
                         .items(Joi.string().valid(...RoleArray))
-                
+                        .unique()                
             })
             .with('Password', 'RepeatPassword');
 
@@ -41,9 +42,11 @@ class ValidateMiddleware {
             
             req.body.Gender = (req.body.Gender == "woman" ? 1 : 0);
             if(req.body.Role){
-                req.body.Role = req.body.Role.map((role: string) => {
-                    return RoleArray.indexOf(role) + 1;
-                });
+                req.body.Role = await Promise.all(
+                    (req.body.Role).map(async (role: string) => {
+                        return Number(await rbacModel.getRoleIDByRoleName(role));
+                    })
+                );
             }
 
             next();
@@ -69,12 +72,46 @@ class ValidateMiddleware {
         }
     }
 
+
     async checkNumberParam(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const validateInput = Joi.object({
                 id: Joi.number().integer().required()                
             })
             await validateInput.validateAsync(req.params, { abortEarly: false });
+            next();
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
+        }
+    }
+
+    async checkRoleArray(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validateInput = Joi.object({
+                Role: Joi.array()
+                        .items(Joi.string().valid(...RoleArray))
+                        .unique()  
+                        .required()              
+            })
+
+            await validateInput.validateAsync(req.body, { abortEarly: false });
+
+            next();
+        } catch (error: unknown) {
+            handlerErrorRes(error, res);
+        }
+    }
+
+    async checkRoleItem(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validateInput = Joi.object({
+                Role: Joi.string()
+                        .valid(...RoleArray)
+                        .required()              
+            })
+
+            await validateInput.validateAsync(req.body, { abortEarly: false });
+
             next();
         } catch (error: unknown) {
             handlerErrorRes(error, res);
